@@ -4,7 +4,7 @@ set -e
 
 charm_dir=`pwd`
 
-relation-set roles="LOGIN" database="discourse"
+relation-set database="discourse"
 
 juju-log "Sent things over the wire, wait for response."
 
@@ -19,8 +19,6 @@ if [ -z "$user" ] || [ -z "$host" ]; then
   exit 0
 fi
 
-juju-log "Postgresql! $host:$port $user $pass $database"
-
 cat > /home/discourse/discourse/config/database.yml <<EOF
 production:
   adapter: postgresql
@@ -30,16 +28,36 @@ production:
   username: $user
   password: $pass
   port: $port
-  host_names:
-    - $host
+  host: $host
 EOF
+
+juju-log "Creating PostgreSQL Database"
+PGPASSWORD=$pass createdb -U $user -h $host -o $user $database
+
+cd /home/discourse/discourse
 
 export RAILS_ENV="production"
 
 juju-log "Raking databases and planting seeds!"
+# The first Rake exits with a status of 1, even if it's successful. So, sorry.
+set +e
+sudo -u discourse -H bundle exec rake RAILS_ENV="production"
+set -e
+sudo -u discourse -H bundle exec rake db:migrate RAILS_ENV="production"
+set +e
+sudo -u discourse -H bundle exec rake RAILS_ENV="production"
+set -e
+sudo -u discourse -H bundle exec rake db:seed RAILS_ENV="production"
 
-sudo -u discourse -H bundle exec rake
-sudo -u discourse -H bundle exec rake db:migrate
-sudo -u discourse -H bundle exec rake db:seed
+
+juju-log "Create assets"
+sudo -u discourse -H bundle exec rake assets:clean RAILS_ENV="production"
+sudo -u discourse -H bundle exec rake assets:precompile RAILS_ENV="production"
 
 juju-log "Database set up"
+
+open-port 80/tcp
+
+if [ -f ".redis" ]; then
+  start discourse
+fi

@@ -2,7 +2,7 @@
 
 set -e
 
-apt-get install -y ruby1.9.3 git-core build-essential libxml2-dev libxslt1-dev libpq-dev nginx
+apt-get install -qy ruby1.9.3 git-core build-essential libxml2-dev libxslt1-dev libpq-dev nginx
 
 charm_dir=`pwd`
 
@@ -15,21 +15,30 @@ rsync -az contrib/*.conf /etc/init/
 juju-log "Bundler ho!"
 gem install bundler
 
-juju-log "Create discourse user"
-adduser --disabled-password --gecos 'Discourse' discourse
+id discourse
+user_exists=$?
 
-juju-log "Fetching source..."
-git clone https://github.com/discourse/discourse.git /home/discourse/discourse
+if [ $user_exists -gt 0 ]; then
+  juju-log "Create discourse user"
+  adduser --disabled-password --gecos 'Discourse' discourse
+fi
 
-cd /home/discourse/discourse
+if [ -d "/home/discourse/discourse" ]; then
+  juju-log "Updating source..."
+  cd /home/discourse/discourse
+  git pull
+else
+  juju-log "Fetching source..."
+  git clone https://github.com/discourse/discourse.git /home/discourse/discourse
+  cd /home/discourse/discourse
+fi
 
 export RAILS_ENV="production"
 
 juju-log "Bundle install"
-sudo -u discourse -H bundle install
+bundle install
 
-juju-log "Create assets"
-sudo -u discourse -H bundle exec rake assets:clean
-sudo -u discourse -H bundle exec rake assets:precompile
+juju-log "Resetting permissions because gems and rake are lame"
+chown -R discourse.discourse /home/discourse/discourse
 
 juju-log "That's it! Time to wait for hooks to fire."

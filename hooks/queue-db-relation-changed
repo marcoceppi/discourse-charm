@@ -22,5 +22,6 @@ EOF
 
 juju-log "Redis has been red"
 
-# This should cascade in to clockwork.
-restart discourse-sidekiq 
+if [ -f ".psql" ]; then
+  start discourse
+fi
