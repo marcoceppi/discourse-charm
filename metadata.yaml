@@ -10,7 +10,7 @@ provides:
   website:
     interface: http
 requires:
-  queuing:
+  queue-db:
     interface: redis
   db:
     interface: pgsql
