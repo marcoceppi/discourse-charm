@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -e
+
+apt-get install -y ruby1.9.3 git-core build-essential libxml2-dev libxslt1-dev libpq-dev nginx
+
+charm_dir=`pwd`
+
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+juju-log "Installing upstart scripts"
+rsync -az contrib/*.conf /etc/init/
+
+juju-log "Bundler ho!"
+gem install bundler
+
+juju-log "Create discourse user"
+adduser --disabled-password --gecos 'Discourse' discourse
+
+juju-log "Fetching source..."
+git clone https://github.com/discourse/discourse.git /home/discourse/discourse
+
+cd /home/discourse/discourse
+
+export RAILS_ENV="production"
+
+juju-log "Bundle install"
+sudo -u discourse -H bundle install
+
+juju-log "Create assets"
+sudo -u discourse -H bundle exec rake assets:clean
+sudo -u discourse -H bundle exec rake assets:precompile
+
+juju-log "That's it! Time to wait for hooks to fire."
