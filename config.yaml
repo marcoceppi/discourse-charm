@@ -1,0 +1,6 @@
+options:
+  admins:
+    type: string
+    default: ""
+    description: | 
+      Comma separated list of user ids who should be an admin. eg: "1,5,8"

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+admins=`config-get admins`
+
+potential_admins=`echo "$admins" | tr -d ' ' | sed 's/,/ /g'`
+
+if [ ! -z "$potential_admins" ]; then
+  for i in ${potential_admins}; do
+    juju-log "Adding admin for $i"
+    echo $i
+  done
+fi

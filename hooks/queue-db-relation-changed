@@ -1,0 +1,26 @@
+#!/bin/bash
+
+redis_srv=`relation-get private-address`
+
+if [ -z "$redis_srv" ]; then
+  juju-log "Hook fired, but we don't have an address"
+  exit 0
+fi
+
+echo "$redis_srv" > .redis
+
+cat > /home/discourse/discourse/config/redis.yml <<EOF
+defaults: &defaults
+  host: $redis_srv
+  port: 6379
+  db: 0
+  cache_db: 2
+
+production:
+  <<: *defaults
+EOF
+
+juju-log "Redis has been red"
+
+# This should cascade in to clockwork.
+restart discourse-sidekiq 

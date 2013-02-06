@@ -1,0 +1,45 @@
+#!/bin/bash
+
+set -e
+
+charm_dir=`pwd`
+
+relation-set roles="LOGIN" database="discourse"
+
+juju-log "Sent things over the wire, wait for response."
+
+database=`relation-get database`
+user=`relation-get user`
+pass=`relation-get password`
+host=`relation-get host`
+port=`relation-get port`
+
+if [ -z "$user" ] || [ -z "$host" ]; then
+  juju-log "Waiting for items on the wire"
+  exit 0
+fi
+
+juju-log "Postgresql! $host:$port $user $pass $database"
+
+cat > /home/discourse/discourse/config/database.yml <<EOF
+production:
+  adapter: postgresql
+  database: $database
+  pool: 5
+  timeout: 5000
+  username: $user
+  password: $pass
+  port: $port
+  host_names:
+    - $host
+EOF
+
+export RAILS_ENV="production"
+
+juju-log "Raking databases and planting seeds!"
+
+sudo -u discourse -H bundle exec rake
+sudo -u discourse -H bundle exec rake db:migrate
+sudo -u discourse -H bundle exec rake db:seed
+
+juju-log "Database set up"
