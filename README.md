@@ -1,6 +1,6 @@
 # About
 
-This charm installs the Discourse application, http://discourse.com
+This charm installs the Discourse application, http://discourse.org
 
 # Install
 
