@@ -41,7 +41,7 @@ if [ -d "/home/discourse/discourse" ]; then
   git pull
 else
   juju-log "Fetching source..."
-  git clone https://github.com/discourse/discourse.git /home/discourse/discourse
+  sudo -u discourse -H git clone https://github.com/discourse/discourse.git /home/discourse/discourse
   cd /home/discourse/discourse
 fi
 
