@@ -2,11 +2,20 @@
 
 admins=`config-get admins`
 
-potential_admins=`echo "$admins" | tr -d ' ' | sed 's/,/ /g'`
+potential_admins=`echo "$admins" | tr -d ' ' | tr -d "'" | sed 's/,/ /g'`
+
+if [ ! -f ".psql" ]; then
+  juju-log "Waiting for a database"
+  exit 0
+fi
+
+source .psql
+
+export PGPASSWORD=$db_pass
 
 if [ ! -z "$potential_admins" ]; then
   for i in ${potential_admins}; do
-    juju-log "Adding admin for $i"
-    echo $i
+    juju-log "Attempting to add admin for $i"
+    echo "UPDATE users SET admin=true WHERE username='$i'" | psql -h $db_host -U $db_user -W $db_dbdb
   done
 fi
