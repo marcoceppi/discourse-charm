@@ -2,7 +2,8 @@
 
 set -e
 
-apt-get install -qy ruby1.9.3 git-core build-essential libxml2-dev libxslt1-dev libpq-dev nginx
+apt-get install -qy ruby1.9.3 git-core build-essential libxml2-dev \
+  libxslt1-dev libpq-dev nginx redis-server
 
 charm_dir=`pwd`
 
@@ -10,7 +11,7 @@ export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 juju-log "Installing upstart scripts"
-rsync -az contrib/*.conf /etc/init/
+rsync -az contrib/upstart/*.conf /etc/init/
 
 juju-log "Bundler ho!"
 gem install bundler
@@ -32,6 +33,13 @@ else
   git clone https://github.com/discourse/discourse.git /home/discourse/discourse
   cd /home/discourse/discourse
 fi
+
+# Discourse should probably use gunicon. gunicorn is cool.
+rsync -az contrib/nginx/ /etc/nginx/sites-available/
+
+rm -f /etc/nginx/sites-enabled/default
+
+ln -s ../sites-available/discourse
 
 export RAILS_ENV="production"
 

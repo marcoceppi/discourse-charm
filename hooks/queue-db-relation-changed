@@ -1,5 +1,7 @@
 #!/bin/bash
 
+apt-get purge -qy redis-server
+
 redis_srv=`relation-get private-address`
 
 if [ -z "$redis_srv" ]; then
@@ -20,8 +22,8 @@ production:
   <<: *defaults
 EOF
 
-juju-log "Redis has been red"
+juju-log "Redis has been read"
 
 if [ -f ".psql" ]; then
-  start discourse
+  restart discourse
 fi
