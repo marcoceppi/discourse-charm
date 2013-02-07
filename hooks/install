@@ -16,13 +16,23 @@ rsync -az contrib/upstart/*.conf /etc/init/
 juju-log "Bundler ho!"
 gem install bundler
 
+set +e
 id discourse
 user_exists=$?
+set -e
 
 if [ $user_exists -gt 0 ]; then
   juju-log "Create discourse user"
   adduser --disabled-password --gecos 'Discourse' discourse
 fi
+
+# Discourse should probably use gunicon. gunicorn is cool.
+juju-log "Placing nginx configuration files"
+rsync -az contrib/nginx/ /etc/nginx/sites-available/
+rm -f /etc/nginx/sites-enabled/default
+ln -s ../sites-available/discourse /etc/nginx/sites-enabled/discourse
+
+service nginx restart
 
 if [ -d "/home/discourse/discourse" ]; then
   juju-log "Updating source..."
@@ -33,13 +43,6 @@ else
   git clone https://github.com/discourse/discourse.git /home/discourse/discourse
   cd /home/discourse/discourse
 fi
-
-# Discourse should probably use gunicon. gunicorn is cool.
-rsync -az contrib/nginx/ /etc/nginx/sites-available/
-
-rm -f /etc/nginx/sites-enabled/default
-
-ln -s ../sites-available/discourse
 
 export RAILS_ENV="production"
 
