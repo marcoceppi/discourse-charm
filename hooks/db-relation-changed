@@ -3,12 +3,11 @@
 set -e
 
 charm_dir=`pwd`
-
-relation-set database="discourse" # In the :db relation of psql needed this, we're db-admin now.
+relation-set database="${JUJU_UNIT_NAME%%/*}" # In the :db relation of psql needed this, we're db-admin now.
 
 juju-log "Sent things over the wire, wait for response."
 
-database="discourse"
+database="${JUJU_UNIT_NAME%%/*}"
 user=`relation-get user`
 pass=`relation-get password`
 host=`relation-get host`
@@ -50,7 +49,17 @@ EOF
   #cd /home/discourse/discourse
   #sudo -u discourse -H bundle exec rake db:create RAILS_ENV="production"
   # Had weird problems with the above, opting instead to just createdb
+  set +e
   PGPASSWORD=$pass createdb -U $user -h $host $database
+  created=$?
+  set -e
+  if [ $created -gt 0 ]; then
+    # We can just ASSUME that it was created already and hope postgresql
+    # isn't broken...
+    juju-log "Database already exists, yay, opening ports"
+    open-port 80/tcp
+    exit 0
+  fi
 fi
 
 cd /home/discourse/discourse
@@ -71,6 +80,6 @@ cd $charm_dir
 
 open-port 80/tcp
 
-. hooks/config-changed
+hooks/config-changed
 
 # start discourse
