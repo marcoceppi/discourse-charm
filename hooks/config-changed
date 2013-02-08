@@ -16,6 +16,6 @@ export PGPASSWORD=$db_pass
 if [ ! -z "$potential_admins" ]; then
   for i in ${potential_admins}; do
     juju-log "Attempting to add admin for $i"
-    echo "UPDATE users SET admin=true WHERE username='$i'" | psql -h $db_host -U $db_user -W $db_dbdb
+    echo "UPDATE users SET admin=true WHERE username='$i'" | psql -h $db_host -U $db_user $db_dbdb
   done
 fi

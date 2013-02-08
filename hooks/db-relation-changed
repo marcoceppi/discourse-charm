@@ -13,6 +13,8 @@ user=`relation-get user`
 pass=`relation-get password`
 host=`relation-get host`
 port=`relation-get port`
+# This is required for some reason. It has nothing to do with database at all.
+me=`unit-get private-address`
 
 if [ -z "$user" ] || [ -z "$host" ]; then
   juju-log "Waiting for items on the wire"
@@ -30,6 +32,8 @@ production:
   password: $pass
   port: $port
   host: $host
+  host_names:
+    - $me
 EOF
 
 if [ ! -f ".psql" ]; then
@@ -42,9 +46,11 @@ db_pass=$pass
 db_dbdb=$database
 EOF
 
-  cd /home/discourse/discourse
   juju-log "Creating PostgreSQL Database"
-  sudo -u discourse -H bundle exec rake db:create RAILS_ENV="production"
+  #cd /home/discourse/discourse
+  #sudo -u discourse -H bundle exec rake db:create RAILS_ENV="production"
+  # Had weird problems with the above, opting instead to just createdb
+  PGPASSWORD=$pass createdb -U $user -h $host $database
 fi
 
 cd /home/discourse/discourse
@@ -67,4 +73,4 @@ open-port 80/tcp
 
 . hooks/config-changed
 
-start discourse
+# start discourse
