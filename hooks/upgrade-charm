@@ -1,0 +1,19 @@
+#!/bin/bash
+
+charm_dir=`pwd`
+# Run the installer again. Why? Because idempotency, that's why.
+hooks/install
+
+# If we have a database, which we might not, then migrate!
+
+if [ -f ".psql" ]; then
+  cd /home/discourse/discourse
+  juju-log "Database migrate"
+  sudo -u discourse -H bundle exec rake db:migrate RAILS_ENV="production"
+
+  juju-log "Re-create assets"
+  sudo -u discourse -H bundle exec rake assets:clean RAILS_ENV="production"
+  sudo -u discourse -H bundle exec rake assets:precompile RAILS_ENV="production"
+
+  restart discourse
+fi

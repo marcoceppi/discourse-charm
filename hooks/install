@@ -50,4 +50,6 @@ export RAILS_ENV="production"
 juju-log "Bundle install"
 sudo -u discourse -H bundle install --deployment
 
+cd $charm_dir
+
 juju-log "That's it! Time to wait for hooks to fire."
