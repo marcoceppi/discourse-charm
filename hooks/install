@@ -15,7 +15,7 @@ juju-log "Installing upstart scripts"
 rsync -az contrib/upstart/*.conf /etc/init/
 
 juju-log "Bundler ho!"
-gem install bundler
+gem install bundler foreman
 
 set +e
 id discourse
@@ -43,7 +43,11 @@ else
   juju-log "Fetching source..."
   sudo -u discourse -H git clone https://github.com/discourse/discourse.git /home/discourse/discourse
   cd /home/discourse/discourse
+  sudo -u discourse -H cp config/redis.yml.sample config/redis.yml
 fi
+
+juju-log "Moving patches in to Discourse trunk"
+rsync -az $charm_dir/contrib/discourse/* ./
 
 export RAILS_ENV="production"
 
