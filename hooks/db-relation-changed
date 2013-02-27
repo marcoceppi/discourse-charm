@@ -66,6 +66,15 @@ cd /home/discourse/discourse
 
 export RAILS_ENV="production"
 
+juju-log "Creating secret token"
+
+token=`sudo -u discourse -H bundle exec rake secret`
+cat > config/initializers/secret_token.rb <<EOF
+Discourse::Application.config.secret_token = "$token"
+EOF
+
+echo "$token" > $CHARM_DIR/.secret_token
+
 juju-log "Raking databases and planting seeds!"
 sudo -u discourse -H bundle exec rake db:migrate RAILS_ENV="production"
 sudo -u discourse -H bundle exec rake db:seed_fu RAILS_ENV="production"
