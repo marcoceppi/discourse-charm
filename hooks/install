@@ -46,8 +46,7 @@ else
   sudo -u discourse -H cp config/redis.yml.sample config/redis.yml
 fi
 
-juju-log "Moving patches in to Discourse trunk"
-rsync -az $charm_dir/contrib/discourse/* ./
+cp .procfile.sample .foreman
 
 export RAILS_ENV="production"
 

@@ -91,4 +91,4 @@ open-port 80/tcp
 
 hooks/config-changed
 
-# start discourse
+start discourse
