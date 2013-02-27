@@ -6,7 +6,7 @@ This charm installs the Discourse application, http://discourse.org
 
 After you've successfully bootstrapped an environment, run the following:
 
-    juju deploy discourse
+    juju deploy cs:~marcoceppi/discourse
     juju deploy postgresql
 
 Then create relations
