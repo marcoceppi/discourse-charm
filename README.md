@@ -52,7 +52,7 @@ If you have a need for a scaled out queuing server, or if you find yourself
 with many discourse units, it will be beneficial to use a separate redis
 server for queue management. To conserve resources all units, by default,
 have their own `redis-server` installed. However, you can deploy and add
-a relation to the [redis-master](jujucharms.com/charms/precise/redis-master)
+a relation to the [redis-master](http://jujucharms.com/charms/precise/redis-master)
 charm in order to provide a central redis server.
 
     juju deploy redis-master redis
@@ -60,5 +60,5 @@ charm in order to provide a central redis server.
 
 In doing so the local `redis-server` installs will be removed and the site
 re-configured to use the new redis service. For more information on scaling
-out redis, refer to the [redis-slave](jujucharms.com/charms/precise/redis-slave)
+out redis, refer to the [redis-slave](http://jujucharms.com/charms/precise/redis-slave)
 charm.
