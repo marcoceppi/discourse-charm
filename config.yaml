@@ -4,3 +4,13 @@ options:
     default: ""
     description: | 
       Comma separated list of usernames who should be an admin. eg: "codinghorror,sam,eviltrout"
+  thins:
+    type: string
+    default: "auto"
+    description: |
+      Number of thin clients to run, set to auto to have things spun up based on resources, otherwise any positive integer greater than 1
+  env:
+    type: string
+    default: "RUBY_GC_MALLOC_LIMIT=90000000 LD_PRELOAD=/usr/lib/libtcmalloc_minimal.so.0.1.0"
+    description: |
+      Environment variables used when running the webserver serving Discourse (thin). See http://meta.discourse.org/t/tuning-ruby-and-rails-for-discourse/4126 for more information
