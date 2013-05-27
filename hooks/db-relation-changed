@@ -58,6 +58,8 @@ EOF
     # isn't broken...
     juju-log "Database already exists, yay, opening ports"
     open-port 80/tcp
+    hooks/config-changed
+    start discourse || restart discourse
     exit 0
   fi
 fi
