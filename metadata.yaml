@@ -14,3 +14,6 @@ requires:
     interface: redis
   db:
     interface: pgsql
+peers:
+  discourse:
+    interface: discourse
