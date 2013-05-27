@@ -38,7 +38,8 @@ service nginx restart
 if [ -d "/home/discourse/discourse" ]; then
   juju-log "Updating source..."
   cd /home/discourse/discourse
-  git pull
+  sudo -u discourse -H git pull
+  rm -f .foreman
 else
   juju-log "Fetching source..."
   sudo -u discourse -H git clone https://github.com/discourse/discourse.git /home/discourse/discourse
