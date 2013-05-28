@@ -1,19 +1,55 @@
 #!/bin/bash
 
+current_repository=`git config --get -f /home/discourse/discourse/.git/config remote.origin.url`
+repository=`config-get repository`
+
+if [ "$current_repository" != "$repository" ]; then
+  # Yikes, they want to really blow this up. Lets try a live migration!
+  # Move installation out of the way, so we can re-do the whole setup thing.
+  mv /home/discourse/discourse /home/discourse/.backup/$(date "+%Y%m%d-%H%M")
+  touch $charm_dir/.migrate
+fi
+
 charm_dir=`pwd`
 # Run the installer again. Why? Because idempotency, that's why.
 hooks/install
 
 # If we have a database, which we might not, then migrate!
-
 if [ -f ".psql" ]; then
   cd /home/discourse/discourse
+  if [ -f "$charm_dir/.database.yml.bak" ]; then
+    cat $charm_dir/.database.yml.bak > config/database.yml
+  elif [ -f "config/database.yml" ] && [ ! -f "$charm_dir/.database.yml.bak" ]; then
+    # For backwards compatibility. Remove and favor running relation hook again when bug is fixed in juju-core
+    cp config/database.yml $charm_dir/.database.yml.bak
+  fi
+
+  if [ -f "$charm_dir/.redis.yml.bak" ]; then
+    cat $charm_dir/.redis.yml.bak > config/redis.yml
+  elif [ -f "$charm_dir/.redis" ] && [ ! -f "$charm_dir/.redis.yml.bak" ]; then
+    cat > config/redis.yml <<EOF
+defaults: &defaults
+  host: $redis_srv
+  port: 6379
+  db: 0
+  cache_db: 2
+
+production:
+  <<: *defaults
+EOF
+    cp config/redis.yml $charm_dir/.redis.yml.bak
+  fi
+
+fi
+
+if [ -f ".migrate" ]; then
+  rm -f .migrate
   juju-log "Database migrate"
   sudo -u discourse -H bundle exec rake db:migrate RAILS_ENV="production"
 
   juju-log "Re-create assets"
   sudo -u discourse -H bundle exec rake assets:clean RAILS_ENV="production"
   sudo -u discourse -H bundle exec rake assets:precompile RAILS_ENV="production"
-
-  restart discourse
 fi
+
+hooks/start

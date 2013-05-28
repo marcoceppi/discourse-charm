@@ -2,6 +2,11 @@
 
 set -e
 
+repository=`config-get repository`
+branch=`config-get branch`
+branch=${branch:-master}
+tag=`config-get release`
+
 apt-get install -qy ruby1.9.3 git-core build-essential libxml2-dev \
   libxslt1-dev libpq-dev nginx redis-server postgresql-client-common \
   postgresql-client-9.1
@@ -36,15 +41,51 @@ ln -s ../sites-available/discourse /etc/nginx/sites-enabled/discourse
 service nginx restart
 
 if [ -d "/home/discourse/discourse" ]; then
-  juju-log "Updating source..."
+  juju-log "Updating repository..."
   cd /home/discourse/discourse
+  sudo -u discourse -H git fetch
   sudo -u discourse -H git pull
+
+  current_branch=$(git symbolic-ref -q HEAD)
+  current_branch_name=${branch_name##refs/heads/}
+  current_tag=$(git describe)
+
+  if [ "$current_branch" != "$branch" ]; then
+    juju-log "Moving current repository to $branch"
+    if git for-each-ref --format "%(refname:short)" refs/heads/ | grep -Eq "^$branch$"; then
+      juju-log "We already have this branch branched. Switch and pull"
+      git checkout $branch
+      git pull origin $branch
+    else
+      juju-log "Branching $branch"
+      git branch -b $branch origin/$branch
+    fi
+    touch $charm_dir/.migrate
+  fi
+
+  if [ "$current_tag" != "$tag" ]; then
+    juju-log "Placing $branch branch at $tag"
+    git reset --hard $tag
+    touch $charm_dir/.migrate
+  fi
+
   rm -f .foreman
 else
-  juju-log "Fetching source..."
-  sudo -u discourse -H git clone https://github.com/discourse/discourse.git /home/discourse/discourse
+  juju-log "Fetching source from $repository..."
+  sudo -u discourse -H git clone $repository /home/discourse/discourse
   cd /home/discourse/discourse
+  if [ "$branch" != "master" ]; then
+    juju-log "Moving new repository to $branch"
+    git branch -b $branch origin/$branch
+  fi
+
+  if [ ! -z "$tag" ]; then
+    juju-log "Placing $branch branch at $tag"
+    git reset --hard $tag
+  fi
+
   sudo -u discourse -H cp config/redis.yml.sample config/redis.yml
+  mkdir -p ../.backup
 fi
 
 cp .procfile.sample .foreman
@@ -56,4 +97,4 @@ sudo -u discourse -H bundle install --deployment
 
 cd $charm_dir
 
-juju-log "That's it! Time to wait for hooks to fire."
+juju-log "Installed/Upgraded"

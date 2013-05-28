@@ -22,6 +22,8 @@ production:
   <<: *defaults
 EOF
 
+cp /home/discourse/discourse/config/redis.yml .redis.yml.bak
+
 juju-log "Redis has been read"
 
 if [ -f ".psql" ]; then

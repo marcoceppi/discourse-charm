@@ -4,6 +4,18 @@ options:
     default: ""
     description: | 
       Comma separated list of usernames who should be an admin. eg: "codinghorror,sam,eviltrout"
+  repository:
+    type: string
+    default: "https://github.com/discourse/discourse.git"
+    description: "Fully qualified git url to repository of discourse application"
+  release:
+    type: string
+    default: "latest-release"
+    description: "Git tag (release) of discourse repository. See README.md for additional details"
+  branch:
+    type: string
+    default: "master"
+    description: "The git branch to use from `repository`"
   thins:
     type: string
     default: "auto"

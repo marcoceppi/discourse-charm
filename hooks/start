@@ -1,1 +1,8 @@
 #!/bin/bash
+
+if [ -f ".psql" ]; then
+  juju-log "Trying to (re)start discourse"
+  start discourse || restart discourse
+else
+  juju-log "No database set up yet, waiting."
+fi
