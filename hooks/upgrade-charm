@@ -50,6 +50,7 @@ if [ -f ".migrate" ]; then
   juju-log "Re-create assets"
   sudo -u discourse -H bundle exec rake assets:clean RAILS_ENV="production"
   sudo -u discourse -H bundle exec rake assets:precompile RAILS_ENV="production"
-fi
+  cd $charm_dir
 
-hooks/start
+  hooks/start
+fi
