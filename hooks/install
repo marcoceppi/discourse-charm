@@ -9,7 +9,7 @@ tag=`config-get release`
 
 apt-get install -qy ruby1.9.3 git-core build-essential libxml2-dev \
   libxslt1-dev libpq-dev nginx redis-server postgresql-client-common \
-  postgresql-client-9.1
+  postgresql-client-9.1 sendmail
 
 charm_dir=`pwd`
 
@@ -36,7 +36,10 @@ fi
 juju-log "Placing nginx configuration files"
 rsync -az contrib/nginx/ /etc/nginx/sites-available/
 rm -f /etc/nginx/sites-enabled/default
-ln -s ../sites-available/discourse /etc/nginx/sites-enabled/discourse
+
+if [ ! -e /etc/nginx/sites-enabled/discourse ]; then
+  ln -s ../sites-available/discourse /etc/nginx/sites-enabled/discourse
+fi
 
 service nginx restart
 
@@ -58,7 +61,7 @@ if [ -d "/home/discourse/discourse" ]; then
       git pull origin $branch
     else
       juju-log "Branching $branch"
-      git branch -b $branch origin/$branch
+      git checkout -b $branch origin/$branch
     fi
     touch $charm_dir/.migrate
   fi
@@ -76,7 +79,7 @@ else
   cd /home/discourse/discourse
   if [ "$branch" != "master" ]; then
     juju-log "Moving new repository to $branch"
-    git branch -b $branch origin/$branch
+    git checkout -b $branch origin/$branch
   fi
 
   if [ ! -z "$tag" ]; then
