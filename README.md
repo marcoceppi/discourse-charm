@@ -93,6 +93,18 @@ use the `release` configuration option for this charm.
 
     juju set discourse branch="not-master"
 
+## env
+
+If you wish to modify the environment variables sent to the Application you can
+override them here. This option is designed to allow [performance tweaking](http://meta.discourse.org/t/tuning-ruby-and-rails-for-discourse/4126?u=marcoceppi)
+to be done against a Discourse install. By default this charm will apply the
+recommended performance tuning for the verion of Ruby installed. To remove these
+simply set this configuration option to a blank string (`""`)
+
+    juju set discourse env="RUBY_GC_MALLOC_LIMIT=90000000"
+
+You can specify multiple variables using a space between `KEY=VAL` pairings
+
 # Extras
 
 These are additional things you can do to enhance your base install.

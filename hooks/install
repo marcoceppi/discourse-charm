@@ -16,8 +16,16 @@ charm_dir=`pwd`
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-juju-log "Installing upstart scripts"
-rsync -az contrib/upstart/*.conf /etc/init/
+if [ -f "/etc/init/discoruse.conf" ]; then
+  juju-log "Replacing old discourse upstart"
+  rm -f /etc/init/discoruse.conf
+fi
+
+. lib/file.bash
+
+juju-log "Installing upstart script"
+rails_env=`config-get env`
+ch_template_file 0644 root:root contrib/upstart/discourse.conf.tpl /etc/init/discourse.conf rails_env
 
 juju-log "Bundler ho!"
 gem install bundler foreman

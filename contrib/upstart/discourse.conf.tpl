@@ -8,6 +8,6 @@ chdir /home/discourse/discourse
 env RAILS_ENV=production
 env PORT=3001
 
-exec sudo -u discourse -H RAILS_ENV=production foreman start
+exec sudo -u discourse -H RAILS_ENV=production $rails_env foreman start
 
 respawn
