@@ -25,6 +25,13 @@ server {
       add_header ETag "";
     }
 
+    location ~* \.(eot|ttf|woff)$ {
+      add_header Access-Control-Allow-Origin *;
+      expires 1M;
+      access_log off;
+      add_header Cache-Control "public";
+    }
+
     location ~ ^/assets/ {
       expires 1y;
       add_header Cache-Control public;
