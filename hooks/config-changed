@@ -13,9 +13,6 @@ source .psql
 
 export PGPASSWORD=$db_pass
 
-juju-log "Re-setting admins"
-echo "UPDATE users SET admin=false" | psql -h $db_host -U $db_user $db_dbdb
-
 if [ ! -z "$potential_admins" ]; then
   for i in ${potential_admins}; do
     juju-log "Attempting to add admin for $i"
