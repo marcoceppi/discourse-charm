@@ -91,7 +91,13 @@ else
   mkdir -p ../.backup
 fi
 
-cp .procfile.sample .foreman
+if [ ! -f .foreman ]; then
+  cp .procfile.sample .foreman
+fi
+
+if [ ! -f config/environments/production.rb ]; then
+  cp config/environments/production.rb.sample config/environments/production.rb
+fi
 
 export RAILS_ENV="production"
 

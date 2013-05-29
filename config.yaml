@@ -25,4 +25,4 @@ options:
     type: string
     default: "RUBY_GC_MALLOC_LIMIT=90000000 LD_PRELOAD=/usr/lib/libtcmalloc_minimal.so.0.1.0"
     description: |
-      Environment variables used when running the webserver serving Discourse (thin). See http://meta.discourse.org/t/tuning-ruby-and-rails-for-discourse/4126 for more information
+      Environment variables used when running the webserver serving Discourse (thin). See README.md for more information
