@@ -42,13 +42,16 @@ separate values:
 
     juju set discourse admins="marcoceppi,codinghorror,sam,eviltrout"
 
-In the event you wish to remove an admin, say `sam`, simply supply the
-same list of users again while removing the user you wish to not have access:
-
-    juju set discourse admins="marcoceppi,codinghorror,eviltrout"
-
 If a user does not exist they will not be granted admin access and will
 simply be skipped.
+
+This will not be updated when a user is granted access via the admin panel. Also,
+in the event you need to remove an admin you'll not only have to update this
+configuration option but you'll also need to Revoke admin in the admin panel.
+This option is designed to set up "god" users, to recover a board if
+administrative access is lost, and during initial setup to define who gets
+access to the site after installation. Further moderator and admin assignments
+should happen in the admin panel.
 
 ## repository
 
