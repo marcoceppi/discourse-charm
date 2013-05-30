@@ -47,12 +47,15 @@ if [ -f ".migrate" ]; then
 
   hooks/stop
 
+  export RAILS_ENV="production"
+  export SECRET_TOKEN=`cat $CHARM_DIR/.secret_token`
+
   juju-log "Database migrate"
-  sudo -u discourse -H bundle exec rake db:migrate RAILS_ENV="production"
+  sudo -u discourse -H bundle exec rake db:migrate
 
   juju-log "Re-create assets"
-  sudo -u discourse -H bundle exec rake assets:clean RAILS_ENV="production"
-  sudo -u discourse -H bundle exec rake assets:precompile RAILS_ENV="production"
+  sudo -u discourse -H bundle exec rake assets:clean
+  sudo -u discourse -H bundle exec rake assets:precompile
   cd $charm_dir
 
   hooks/start
