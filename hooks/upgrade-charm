@@ -39,7 +39,6 @@ production:
 EOF
     cp config/redis.yml $charm_dir/.redis.yml.bak
   fi
-
 fi
 
 if [ -f ".migrate" ]; then
@@ -51,11 +50,11 @@ if [ -f ".migrate" ]; then
   export SECRET_TOKEN=`cat $CHARM_DIR/.secret_token`
 
   juju-log "Database migrate"
-  sudo -u discourse -H bundle exec rake db:migrate
+  sudo -u discourse -H bundle exec rake db:migrate SECRET_TOKEN=`cat $CHARM_DIR/.secret_token` RAILS_ENV="production"
 
   juju-log "Re-create assets"
-  sudo -u discourse -H bundle exec rake assets:clean
-  sudo -u discourse -H bundle exec rake assets:precompile
+  sudo -u discourse -H bundle exec rake assets:clean SECRET_TOKEN=`cat $CHARM_DIR/.secret_token` RAILS_ENV="production"
+  sudo -u discourse -H bundle exec rake assets:precompile SECRET_TOKEN=`cat $CHARM_DIR/.secret_token` RAILS_ENV="production"
   cd $charm_dir
 
   hooks/start

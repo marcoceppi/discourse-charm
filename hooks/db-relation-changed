@@ -71,12 +71,12 @@ cd /home/discourse/discourse
 export RAILS_ENV="production"
 
 juju-log "Raking databases and planting seeds!"
-sudo -u discourse -H bundle exec rake db:migrate RAILS_ENV="production"
-sudo -u discourse -H bundle exec rake db:seed_fu RAILS_ENV="production"
+sudo -u discourse -H bundle exec rake db:migrate RAILS_ENV="production" SECRET_TOKEN=`cat $CHARM_DIR/.secret_token`
+sudo -u discourse -H bundle exec rake db:seed_fu RAILS_ENV="production" SECRET_TOKEN=`cat $CHARM_DIR/.secret_token`
 
 juju-log "Create assets"
-sudo -u discourse -H bundle exec rake assets:clean RAILS_ENV="production"
-sudo -u discourse -H bundle exec rake assets:precompile RAILS_ENV="production"
+sudo -u discourse -H bundle exec rake assets:clean RAILS_ENV="production" SECRET_TOKEN=`cat $CHARM_DIR/.secret_token`
+sudo -u discourse -H bundle exec rake assets:precompile RAILS_ENV="production" SECRET_TOKEN=`cat $CHARM_DIR/.secret_token`
 
 juju-log "Database set up"
 
