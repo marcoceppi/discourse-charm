@@ -44,6 +44,9 @@ fi
 
 if [ -f ".migrate" ]; then
   rm -f .migrate
+
+  hooks/stop
+
   juju-log "Database migrate"
   sudo -u discourse -H bundle exec rake db:migrate RAILS_ENV="production"
 
