@@ -1,0 +1,13 @@
+#!/bin/bash
+
+new_token=`relation-get secret-token`
+
+if [ -z "$new_token" ]; then
+  if [ -f $CHARM_DIR/.secret_token ]; then
+    juju-log "Sending my token for consideration"
+    relation-set secret-token=`cat $CHARM_DIR/.secret_token`
+  fi
+else
+  echo "$new_token" > $CHARM_DIR/.secret_token
+  hooks/config-changed
+fi

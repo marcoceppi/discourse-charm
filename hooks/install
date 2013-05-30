@@ -112,6 +112,19 @@ export RAILS_ENV="production"
 juju-log "Bundle install"
 sudo -u discourse -H bundle install --deployment
 
+if [ -f $CHARM_DIR/.secret_token ]; then
+  juju-log "Loading secret token"
+  token=`cat $CHARM_DIR/.secret_token`
+else
+  juju-log "Creating secret token"
+  token=`sudo -u discourse -H bundle exec rake secret`
+  echo "$token" > $CHARM_DIR/.secret_token
+fi
+
+cat > config/initializers/secret_token.rb <<EOF
+Discourse::Application.config.secret_token = "$token"
+EOF
+
 cd $charm_dir
 
 juju-log "Installed/Upgraded"
