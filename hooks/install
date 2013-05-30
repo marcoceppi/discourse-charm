@@ -11,8 +11,6 @@ apt-get install -qy ruby1.9.3 git-core build-essential libxml2-dev \
   libxslt1-dev libpq-dev nginx redis-server postgresql-client-common \
   postgresql-client-9.1 sendmail libtcmalloc-minimal0
 
-charm_dir=`pwd`
-
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
@@ -60,13 +58,13 @@ if [ -d "/home/discourse/discourse" ]; then
       juju-log "Branching $branch"
       git checkout -b $branch origin/$branch
     fi
-    touch $charm_dir/.migrate
+    touch $CHARM_DIR/.migrate
   fi
 
   if [ "$current_tag" != "$tag" ]; then
     juju-log "Placing $branch branch at $tag"
     git reset --hard $tag
-    touch $charm_dir/.migrate
+    touch $CHARM_DIR/.migrate
   fi
 
   rm -f .foreman
@@ -115,13 +113,13 @@ if [ -f "/etc/init/discoruse.conf" ]; then
   rm -f /etc/init/discoruse.conf
 fi
 
-. lib/file.bash
+. $CHARM_DIR/lib/file.bash
 
 juju-log "Installing upstart script"
 rails_env=`config-get env | sed -e "s/ /\nenv /g" -e "s/^/env /"`
 ch_template_file 0644 root:root $CHARM_DIR/contrib/upstart/discourse.conf.tpl /etc/init/discourse.conf rails_env token
 
-cd $charm_dir
+cd $CHARM_DIR
 
 chown -R discourse.discourse /home/discourse/discourse
 juju-log "Installed/Upgraded"
