@@ -127,4 +127,5 @@ EOF
 
 cd $charm_dir
 
+chown -R discourse.discourse /home/discourse/discourse
 juju-log "Installed/Upgraded"
