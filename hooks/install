@@ -27,7 +27,6 @@ if [ $user_exists -gt 0 ]; then
   adduser --disabled-password --gecos 'Discourse' discourse
 fi
 
-# Discourse should probably use gunicon. gunicorn is cool.
 juju-log "Placing nginx configuration files"
 rsync -az contrib/nginx/ /etc/nginx/sites-available/
 rm -f /etc/nginx/sites-enabled/default
