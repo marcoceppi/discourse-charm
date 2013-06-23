@@ -41,29 +41,29 @@ if [ -d "/home/discourse/discourse" ]; then
   juju-log "Updating repository..."
   cd /home/discourse/discourse
   sudo -u discourse -H git fetch
-  sudo -u discourse -H git pull
 
   current_branch=$(git symbolic-ref -q HEAD)
   current_branch_name=${branch_name##refs/heads/}
   current_tag=$(git describe)
 
-  if [ "$current_branch" != "$branch" ]; then
-    juju-log "Moving current repository to $branch"
-    if git for-each-ref --format "%(refname:short)" refs/heads/ | grep -Eq "^$branch$"; then
-      juju-log "We already have this branch branched. Switch and pull"
-      git checkout $branch
-      git pull origin $branch
-    else
-      juju-log "Branching $branch"
-      git checkout -b $branch origin/$branch
-    fi
-    touch $CHARM_DIR/.migrate
-  fi
-
-  if [ "$current_tag" != "$tag" ]; then
+  if [ "$current_tag" != "$tag" ] && [ ! -z "$tag" ]; then
     juju-log "Placing $branch branch at $tag"
     git reset --hard $tag
     touch $CHARM_DIR/.migrate
+  else
+    if [ "$current_branch_name" != "$branch" ]; then
+      juju-log "Moving current repository to $branch"
+      if git for-each-ref --format "%(refname:short)" refs/heads/ | grep -Eq "^$branch$"; then
+        juju-log "We already have this branch branched. Switch and pull"
+        git branch -D $branch
+      fi
+      juju-log "Branching $branch"
+      git checkout -b $branch origin/$branch
+
+      touch $CHARM_DIR/.migrate
+    else
+      git pull
+    fi
   fi
 
   rm -f .foreman
@@ -71,14 +71,18 @@ else
   juju-log "Fetching source from $repository..."
   sudo -u discourse -H git clone $repository /home/discourse/discourse
   cd /home/discourse/discourse
-  if [ "$branch" != "master" ]; then
-    juju-log "Moving new repository to $branch"
-    git checkout -b $branch origin/$branch
-  fi
 
   if [ ! -z "$tag" ]; then
-    juju-log "Placing $branch branch at $tag"
-    git reset --hard $tag
+    juju-log "Checkout out $tag tag"
+    git checkout $tag
+  else
+    current_branch=$(git symbolic-ref -q HEAD)
+    current_branch_name=${branch_name##refs/heads/}
+
+    if [ "$current_branch_name" != "$branch" ]; then
+      juju-log "Moving new repository to $branch"
+      git checkout -b $branch origin/$branch
+    fi
   fi
 
   sudo -u discourse -H cp config/redis.yml.sample config/redis.yml
