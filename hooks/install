@@ -113,7 +113,7 @@ fi
 
 if [ -f "/etc/init/discoruse.conf" ]; then
   juju-log "Replacing old discourse upstart"
-  rm -f /etc/init/discoruse.conf
+  rm -f /etc/init/discourse.conf
 fi
 
 . $CHARM_DIR/lib/file.bash
