@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 charm_dir=`pwd`
 relation-set database="${JUJU_UNIT_NAME%%/*}" # In the :db relation of psql needed this, we're db-admin now.

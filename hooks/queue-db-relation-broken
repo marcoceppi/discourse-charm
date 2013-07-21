@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 apt-get install -qy redis-server
 
 cat > /home/discourse/discourse/config/redis.yml <<EOF

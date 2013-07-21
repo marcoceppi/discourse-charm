@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 apt-get purge -qy redis-server
 
 redis_srv=`relation-get private-address`

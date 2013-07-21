@@ -1,4 +1,4 @@
-description "Discourse Application Stack"
+description "Discourse Web"
 author "Marco Ceppi <marco@ceppi.net>"
 
 start on (local-filesystems and net-device-up IFACE!=lo)

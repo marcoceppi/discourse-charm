@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 admins=`config-get admins`
 
 potential_admins=`echo "$admins" | tr -d ' ' | tr -d "'" | sed 's/,/ /g'`

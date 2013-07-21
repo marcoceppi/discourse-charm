@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 new_token=`relation-get secret-token`
 
 if [ -z "$new_token" ]; then

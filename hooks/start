@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 if [ -f ".psql" ]; then
   juju-log "Trying to (re)start discourse"
   start discourse || restart discourse

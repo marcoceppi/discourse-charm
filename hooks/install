@@ -1,11 +1,9 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 repository=`config-get repository`
-branch=`config-get branch`
-branch=${branch:-master}
-tag=`config-get release`
+release=`config-get release`
 
 apt-get install -qy ruby1.9.3 git-core build-essential libxml2-dev \
   libxslt1-dev libpq-dev nginx redis-server postgresql-client-common \
@@ -42,29 +40,34 @@ if [ -d "/home/discourse/discourse" ]; then
   cd /home/discourse/discourse
   sudo -u discourse -H git fetch
 
-  current_branch=$(git symbolic-ref -q HEAD)
-  current_branch_name=${branch_name##refs/heads/}
-  current_tag=$(git describe)
+  # Determine branch or tag currently assigned
 
-  if [ "$current_tag" != "$tag" ] && [ ! -z "$tag" ]; then
-    juju-log "Placing $branch branch at $tag"
-    git reset --hard $tag
+  current_release=$(git describe)
+  current_release_is_branch=""
+
+  if [ `git symbolic-ref -q HEAD` ]; then
+    current_release=$(git symbolic-ref -q HEAD)
+    current_release=${current_branch##refs/heads/}
+    current_release_is_branch=true
+  fi
+
+  if [ "$current_release" != "$release" ] && [ ! -z "$release" ]; then
+    juju-log "Placing $repository at $release"
+    if [ $current_release_is_branch ]; then
+      if git for-each-ref --format "%(refname:short)" refs/heads/ | grep -Eq "^$branch$"; then
+        juju-log "We already have this branch branched. Delete it for a clean pull"
+        sudo -u discourse -H git branch -D $release
+      fi
+      sudo -u discourse -H git checkout -b $release origin/$release
+    else
+      # This is a headless one-time checkout.
+      sudo -u discourse -H git checkout $release
+    fi
+
     touch $CHARM_DIR/.migrate
   else
-    if [ "$current_branch_name" != "$branch" ]; then
-      juju-log "Moving current repository to $branch"
-      if git for-each-ref --format "%(refname:short)" refs/heads/ | grep -Eq "^$branch$"; then
-        juju-log "We already have this branch branched. Switch and pull"
-        git branch -D $branch
-      fi
-      juju-log "Branching $branch"
-      git checkout -b $branch origin/$branch
-
-      touch $CHARM_DIR/.migrate
-    else
-      git pull
-    fi
-  fi
+    if [ $current_release_is_branch ]; then
+      
 
   rm -f .foreman
 else
@@ -72,9 +75,9 @@ else
   sudo -u discourse -H git clone $repository /home/discourse/discourse
   cd /home/discourse/discourse
 
-  if [ ! -z "$tag" ]; then
-    juju-log "Checkout out $tag tag"
-    git checkout $tag
+  if [ ! -z "$release" ]; then
+    juju-log "Checkout out $release tag"
+    git checkout $release
   else
     current_branch=$(git symbolic-ref -q HEAD)
     current_branch_name=${branch_name##refs/heads/}

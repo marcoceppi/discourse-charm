@@ -81,17 +81,20 @@ result in broken behavior due to version inconsistency between units.
 
     juju set discourse version="v0.9.1"
 
-Release can be any valid `git tag` in the given `repository`
+Release can be any valid git ref (`git tag`, `git branch`) in the given `repository`
 
-## branch
+## thins
 
-If you're using a custom repository and wish to point to a branch other than
-the master, then use this option to change from the default "master" to another
-valid branch name in your repository. At the time of this writing all upstream
-versions are maintained by git tags. To switch to a different release of Discourse
-use the `release` configuration option for this charm.
+This option allows you to control how many instances of thin you wish to run on
+one unit. By default (auto) will select a number of 2 or greater depending on
+machine resources (CPU and RAM) available. If you wish to override this behavior
+you can manipulate this option as long as it's a positive integer. All other values
+will result in "auto" being used.
 
-    juju set discourse branch="not-master"
+    juju set discourse thins=2
+
+Upstream recommends at least 2 instances of thin running in order to properly
+handle requests to the application.
 
 ## env
 

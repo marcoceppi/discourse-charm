@@ -11,11 +11,7 @@ options:
   release:
     type: string
     default: "latest-release"
-    description: "Git tag (release) of discourse repository. See README.md for additional details"
-  branch:
-    type: string
-    default: "master"
-    description: "The git branch to use from `repository`"
+    description: "Git tag (release) or branch of discourse repository. See README.md for additional details"
   thins:
     type: string
     default: "auto"

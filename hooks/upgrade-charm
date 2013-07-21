@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 current_repository=`git config --get -f /home/discourse/discourse/.git/config remote.origin.url`
 repository=`config-get repository`
 
