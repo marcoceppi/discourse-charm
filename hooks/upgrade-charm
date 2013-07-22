@@ -8,27 +8,27 @@ repository=`config-get repository`
 if [ "$current_repository" != "$repository" ]; then
   # Yikes, they want to really blow this up. Lets try a live migration!
   # Move installation out of the way, so we can re-do the whole setup thing.
+  $CHARM_DIR/hooks/stop
   mv /home/discourse/discourse /home/discourse/.backup/$(date "+%Y%m%d-%H%M")
-  touch $charm_dir/.migrate
+  touch $CHARM_DIR/.migrate
 fi
 
-charm_dir=`pwd`
 # Run the installer again. Why? Because idempotency, that's why.
-hooks/install
+$CHARM_DIR/hooks/install
 
 # If we have a database, which we might not, then migrate!
 if [ -f ".psql" ]; then
   cd /home/discourse/discourse
-  if [ -f "$charm_dir/.database.yml.bak" ]; then
-    cat $charm_dir/.database.yml.bak > config/database.yml
-  elif [ -f "config/database.yml" ] && [ ! -f "$charm_dir/.database.yml.bak" ]; then
+  if [ -f "$CHARM_DIR/.database.yml.bak" ]; then
+    cat $CHARM_DIR/.database.yml.bak > config/database.yml
+  elif [ -f "config/database.yml" ] && [ ! -f "$CHARM_DIR/.database.yml.bak" ]; then
     # For backwards compatibility. Remove and favor running relation hook again when bug is fixed in juju-core
-    cp config/database.yml $charm_dir/.database.yml.bak
+    cp config/database.yml $CHARM_DIR/.database.yml.bak
   fi
 
-  if [ -f "$charm_dir/.redis.yml.bak" ]; then
-    cat $charm_dir/.redis.yml.bak > config/redis.yml
-  elif [ -f "$charm_dir/.redis" ] && [ ! -f "$charm_dir/.redis.yml.bak" ]; then
+  if [ -f "$CHARM_DIR/.redis.yml.bak" ]; then
+    cat $CHARM_DIR/.redis.yml.bak > config/redis.yml
+  elif [ -f "$CHARM_DIR/.redis" ] && [ ! -f "$CHARM_DIR/.redis.yml.bak" ]; then
     cat > config/redis.yml <<EOF
 defaults: &defaults
   host: $redis_srv
@@ -39,14 +39,14 @@ defaults: &defaults
 production:
   <<: *defaults
 EOF
-    cp config/redis.yml $charm_dir/.redis.yml.bak
+    cp config/redis.yml $CHARM_DIR/.redis.yml.bak
   fi
 fi
 
-if [ -f ".migrate" ]; then
-  rm -f .migrate
+if [ -f "$CHARM_DIR/.migrate" ]; then
+  rm -f $CHARM_DIR/.migrate
 
-  hooks/stop
+  $CHARM_DIR/hooks/stop
 
   export RAILS_ENV="production"
   export SECRET_TOKEN=`cat $CHARM_DIR/.secret_token`
@@ -57,7 +57,7 @@ if [ -f ".migrate" ]; then
   juju-log "Re-create assets"
   sudo -u discourse -H bundle exec rake assets:clean SECRET_TOKEN=`cat $CHARM_DIR/.secret_token` RAILS_ENV="production"
   sudo -u discourse -H bundle exec rake assets:precompile SECRET_TOKEN=`cat $CHARM_DIR/.secret_token` RAILS_ENV="production"
-  cd $charm_dir
+  cd $CHARM_DIR
 
-  hooks/start
+  $CHARM_DIR/hooks/start
 fi
