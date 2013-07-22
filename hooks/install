@@ -2,6 +2,8 @@
 
 set -ex
 
+chmod +x $CHARM_DIR
+
 repository=`config-get repository`
 release=`config-get release`
 
