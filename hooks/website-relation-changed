@@ -1,0 +1,3 @@
+#!/bin/sh
+
+relation-set hostname=`unit-get private-address` port=80
