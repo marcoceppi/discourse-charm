@@ -49,7 +49,7 @@ if [ -d "/home/discourse/discourse" ]; then
 
   if [ `git symbolic-ref -q HEAD` ]; then
     current_release=$(git symbolic-ref -q HEAD)
-    current_release=${current_branch##refs/heads/}
+    current_release=${current_release##refs/heads/}
     current_release_is_branch=true
   fi
 
