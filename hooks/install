@@ -69,7 +69,9 @@ if [ -d "/home/discourse/discourse" ]; then
     touch $CHARM_DIR/.migrate
   else
     if [ $current_release_is_branch ]; then
-      
+      sudo -u discourse -H git pull
+    fi
+  fi
 
   rm -f .foreman
 else
