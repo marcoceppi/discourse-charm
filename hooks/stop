@@ -2,4 +2,4 @@
 
 set -ex
 
-stop discourse
+stop discourse || true
