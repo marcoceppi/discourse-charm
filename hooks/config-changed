@@ -3,6 +3,7 @@
 set -ex
 
 admins=`config-get admins`
+webs=`config-get thins`
 
 potential_admins=`echo "$admins" | tr -d ' ' | tr -d "'" | sed 's/,/ /g'`
 
@@ -11,7 +12,7 @@ if [ ! -f ".psql" ]; then
   exit 0
 fi
 
-source .psql
+source $CHARM_DIR/.psql
 
 export PGPASSWORD=$db_pass
 
@@ -25,3 +26,39 @@ fi
 juju-log "Running upgrade-charm to handle the rest of configuration"
 
 hooks/upgrade-charm
+if [ -f /etc/default/discourse ]; then
+  . /etc/default/discourse
+else
+  THINS=0
+fi
+
+if [ "$webs" == "auto" ]; then
+  # Count the RAM and CPU. Find the lowest and get a number. 1 RAM/CPU = 1 THIN. Miniumum 1
+  ram=$(expr `cat /proc/meminfo | grep MemTotal | awk '{print $2}'` / `expr 1024 * 1024`)
+  cpu=`nproc`
+
+  if [ $ram -gt $cpu ]; then
+    webs=$cpu
+  else
+    webs=$ram
+  fi
+
+  if [ $webs -le 0 ]; then
+    webs=1
+  fi
+fi
+
+if [ $THINS -ne $webs ]; then
+  cat <<EOD > /etc/default/discourse
+THINS=$webs
+START_PORT=3000
+EOD
+
+  for i in `initctl list | grep ^discourse-web` | awk '{print $2}' | tr -d ')' | tr -d '('`; do
+    juju-log "Stopping discourse-web on $i port"
+    stop discourse-web PORT=$i
+  done
+
+  juju-log "Re-starting discourse thins"
+  start discourse-webs
+fi

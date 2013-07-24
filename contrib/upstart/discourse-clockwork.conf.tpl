@@ -1,12 +1,11 @@
-description "Discourse Web Unit"
+description "Discourse Clockwork"
 author "Marco Ceppi <marco@ceppi.net>"
 
+start on starting discourse
 stop on stopping discourse
 
 respawn
 respawn limit 3 30
-
-instance $PORT
 
 chdir /home/discourse/discourse
 
@@ -17,4 +16,4 @@ $rails_env
 env RAILS_ENV=production
 env SECRET_TOKEN=$token
 
-exec bundle exec rails server -p $PORT
+exec bundle exec clockwork config/clock.rb

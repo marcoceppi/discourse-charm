@@ -127,7 +127,12 @@ fi
 
 juju-log "Installing upstart script"
 rails_env=`config-get env | sed -e "s/ /\nenv /g" -e "s/^/env /"`
+
 ch_template_file 0644 root:root $CHARM_DIR/contrib/upstart/discourse.conf.tpl /etc/init/discourse.conf rails_env token
+ch_template_file 0644 root:root $CHARM_DIR/contrib/upstart/discourse-sidekiq.conf.tpl /etc/init/discourse-sidekiq.conf rails_env token
+ch_template_file 0644 root:root $CHARM_DIR/contrib/upstart/discourse-clockwork.conf.tpl /etc/init/discourse-clockwork.conf rails_env token
+ch_template_file 0644 root:root $CHARM_DIR/contrib/upstart/discourse-webs.conf.tpl /etc/init/discourse-webs.conf rails_env token
+ch_template_file 0644 root:root $CHARM_DIR/contrib/upstart/discourse-web.conf.tpl /etc/init/discourse-web.conf rails_env token
 
 cd $CHARM_DIR
 
