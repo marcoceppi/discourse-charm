@@ -23,9 +23,40 @@ if [ ! -z "$potential_admins" ]; then
   done
 fi
 
-juju-log "Running upgrade-charm to handle the rest of configuration"
+current_repository=`git config --get -f /home/discourse/discourse/.git/config remote.origin.url`
+repository=`config-get repository`
 
-hooks/upgrade-charm
+if [ "$current_repository" != "$repository" ]; then
+  # Yikes, they want to really blow this up. Lets try a live migration!
+  # Move installation out of the way, so we can re-do the whole setup thing.
+  hooks/stop
+  mv /home/discourse/discourse /home/discourse/.backup/$(date "+%Y%m%d-%H%M")
+  touch $CHARM_DIR/.migrate
+fi
+
+hooks/install
+
+if [ -f "$CHARM_DIR/.migrate" ]; then
+  cd /home/discourse/discourse
+  rm -f $CHARM_DIR/.migrate
+
+  $CHARM_DIR/hooks/stop
+
+  export RAILS_ENV="production"
+  export SECRET_TOKEN=`cat $CHARM_DIR/.secret_token`
+
+  juju-log "Database migrate"
+  sudo -u discourse -H bundle exec rake db:migrate SECRET_TOKEN=`cat $CHARM_DIR/.secret_token` RAILS_ENV="production"
+
+  juju-log "Re-create assets"
+  sudo -u discourse -H bundle exec rake assets:clean SECRET_TOKEN=`cat $CHARM_DIR/.secret_token` RAILS_ENV="production"
+  sudo -u discourse -H bundle exec rake assets:precompile SECRET_TOKEN=`cat $CHARM_DIR/.secret_token` RAILS_ENV="production"
+  cd $CHARM_DIR
+
+  $CHARM_DIR/hooks/start
+fi
+
+
 if [ -f /etc/default/discourse ]; then
   . /etc/default/discourse
 else
