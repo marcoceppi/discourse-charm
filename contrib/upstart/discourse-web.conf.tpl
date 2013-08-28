@@ -6,7 +6,7 @@ stop on stopping discourse
 respawn
 respawn limit 3 30
 
-instance $PORT
+instance \$PORT
 
 chdir /home/discourse/discourse
 
@@ -17,4 +17,4 @@ $rails_env
 env RAILS_ENV=production
 env SECRET_TOKEN=$token
 
-exec bundle exec rails server -p $PORT
+exec bundle exec rails server -p \$PORT

@@ -15,7 +15,7 @@ export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 juju-log "Bundler ho!"
-gem install bundler foreman
+gem install bundler
 
 set +e
 id discourse
@@ -27,15 +27,9 @@ if [ $user_exists -gt 0 ]; then
   adduser --disabled-password --gecos 'Discourse' discourse
 fi
 
-juju-log "Placing nginx configuration files"
-rsync -az contrib/nginx/ /etc/nginx/sites-available/
-rm -f /etc/nginx/sites-enabled/default
-
-if [ ! -e /etc/nginx/sites-enabled/discourse ]; then
-  ln -s ../sites-available/discourse /etc/nginx/sites-enabled/discourse
+if [ -f "/etc/nginx/sites-enabled/default" ]; then
+  rm -f /etc/nginx/sites-enabled/default
 fi
-
-service nginx restart
 
 if [ -d "/home/discourse/discourse" ]; then
   juju-log "Updating repository..."
@@ -94,10 +88,6 @@ else
 
   sudo -u discourse -H cp config/redis.yml.sample config/redis.yml
   mkdir -p ../.backup
-fi
-
-if [ ! -f .foreman ]; then
-  cp .procfile.sample .foreman
 fi
 
 if [ ! -f config/environments/production.rb ]; then

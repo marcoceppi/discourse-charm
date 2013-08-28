@@ -65,7 +65,8 @@ fi
 
 if [ "$webs" == "auto" ]; then
   # Count the RAM and CPU. Find the lowest and get a number. 1 RAM/CPU = 1 THIN. Miniumum 1
-  ram=$(expr `cat /proc/meminfo | grep MemTotal | awk '{print $2}'` / `expr 1024 * 1024`)
+#  ram=$(expr `cat /proc/meminfo | grep MemTotal | awk '{print $2}'` / `expr 1024 \* 1024`)
+  ram=$(expr `cat /proc/meminfo | grep MemTotal | awk '{print $2}'` / `expr 1000 \* 1000`)
   cpu=`nproc`
 
   if [ $ram -gt $cpu ]; then
@@ -85,11 +86,32 @@ THINS=$webs
 START_PORT=3000
 EOD
 
-  for i in `initctl list | grep ^discourse-web` | awk '{print $2}' | tr -d ')' | tr -d '('`; do
-    juju-log "Stopping discourse-web on $i port"
-    stop discourse-web PORT=$i
+  # Eventually make this a cascading thing. Stop one start another
+  for i in `initctl list | grep '^discourse-web ' | awk '{print $2}' | tr -d ')' | tr -d '('`; do
+    if [[ "$i" =~ ^[0-9]+$ ]]; then
+      juju-log "Stopping discourse-web on $i port"
+      stop discourse-web PORT=$i || true
+    fi
   done
 
   juju-log "Re-starting discourse thins"
   start discourse-webs
+
+  upstream=""
+  for i in `initctl list | grep '^discourse-web ' | awk '{print $2}' | tr -d ')' | tr -d '('`; do
+    if [[ "$i" =~ ^[0-9]+$ ]]; then
+      upstream="$upstream  server 127.0.0.1:$i;\n"
+    fi
+  done
+
+  . lib/file.bash
+
+  juju-log "Placing nginx configuration files"
+  ch_template_file 0644 root:root $CHARM_DIR/contrib/nginx/discourse /etc/nginx/sites-available/discourse upstream
+
+  if [ ! -e /etc/nginx/sites-enabled/discourse ]; then
+    ln -s ../sites-available/discourse /etc/nginx/sites-enabled/discourse
+  fi
+
+  service nginx restart
 fi

@@ -1,6 +1,5 @@
 upstream discourse {
-  server 127.0.0.1:3001;
-  server 127.0.0.1:3000;
+$upstream
 }
 
 server {
@@ -25,7 +24,7 @@ server {
       add_header ETag "";
     }
 
-    location ~* \.(eot|ttf|woff)$ {
+    location ~* \.(eot|ttf|woff)\$ {
       add_header Access-Control-Allow-Origin *;
       expires 1M;
       access_log off;
@@ -39,19 +38,19 @@ server {
       break;
     }
 
-    proxy_set_header  X-Real-IP  $remote_addr;
-    proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header Host $http_host;
+    proxy_set_header  X-Real-IP  \$remote_addr;
+    proxy_set_header  X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header Host \$http_host;
 
     # If the file exists as a static file serve it directly without
     # running all the other rewite tests on it
     # Brandon would have a fit if he saw these if statements. You apparently
     # don't use if statements in nginx. Should replaces these with try_files
-    if (-f $request_filename) {
+    if (-f \$request_filename) {
       break;
     }
 
-    if (!-f $request_filename) {
+    if (!-f \$request_filename) {
       proxy_pass http://discourse;
       break;
     }
