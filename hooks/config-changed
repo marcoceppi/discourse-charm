@@ -100,7 +100,8 @@ EOD
   upstream=""
   for i in `initctl list | grep '^discourse-web ' | awk '{print $2}' | tr -d ')' | tr -d '('`; do
     if [[ "$i" =~ ^[0-9]+$ ]]; then
-      upstream="$upstream  server 127.0.0.1:$i;\n"
+      upstream="$upstream
+  server 127.0.0.1:$i;"
     fi
   done
 
