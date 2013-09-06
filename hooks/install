@@ -9,7 +9,7 @@ release=`config-get release`
 
 apt-get install -qy ruby1.9.3 git-core build-essential libxml2-dev \
   libxslt1-dev libpq-dev nginx redis-server postgresql-client-common \
-  postgresql-client-9.1 sendmail libtcmalloc-minimal0
+  postgresql-client-9.1 sendmail libtcmalloc-minimal0 imagemagick
 
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
