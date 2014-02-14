@@ -79,7 +79,7 @@ of Discourse you deployed. Doing so will ensure that during scale-out you'll
 maintain the same version of Discourse between units. Failure to do so may
 result in broken behavior due to version inconsistency between units.
 
-    juju set discourse version="v0.9.1"
+    juju set discourse release="v0.9.1"
 
 Release can be any valid git ref (`git tag`, `git branch`) in the given `repository`
 
