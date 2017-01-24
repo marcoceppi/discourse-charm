@@ -1,0 +1,7 @@
+includes:
+ - layer:basic
+ - layer:docker
+ - interface:pgsql
+ - interface:redis
+ - interface:http
+
